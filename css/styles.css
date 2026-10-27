@@ -228,6 +228,7 @@ a.card, button.card { display: flex; align-items: center; gap: 12px; width: 100%
 .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 14px; }
 .sheet h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
 .sheet .lead { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+.sheet .steps { margin: 0 0 16px; padding-left: 20px; font-size: 15px; line-height: 1.5; display: grid; gap: 8px; }
 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .tile { min-height: 72px; border: 0; border-radius: 18px; background: var(--sand-tint); font-weight: 800; font-size: 17px; }
 .tile.mist { background: var(--mist-tint); }

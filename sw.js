@@ -1,6 +1,6 @@
 // Offline support: serve from cache first, refresh the cache in the background.
 // Bump VERSION whenever files change so installed copies pick up the update.
-const VERSION = 'nr-v1';
+const VERSION = 'nr-v2';
 
 const ASSETS = [
   './',

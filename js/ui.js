@@ -108,6 +108,35 @@ export async function saveFile(name, mime, content) {
   return true;
 }
 
-export const isStandalone = () => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+// ---------- Calendar files ----------
+// The iPhone share sheet has no "Add to Calendar" for files shared from a web app. The reliable route is
+// Save to Files, then tapping the saved file in the Files app, which opens Calendar's "Add All" screen.
+let calendarFile = null;
+
+export function offerCalendarFile(name, ics, { what, onSaved } = {}) {
+  calendarFile = { name, ics, onSaved };
+  openSheet(html`
+    <h2>Add ${what || 'to Calendar'}</h2>
+    <p class="lead">Your iPhone adds these in two quick steps:</p>
+    <ol class="steps">
+      <li>Tap <b>Save file</b> below, then choose <b>Save to Files</b> and tap Save.</li>
+      <li>Open the <b>Files</b> app, tap <b>${name}</b>, then tap <b>Add All</b> at the bottom and choose a calendar.</li>
+    </ol>
+    <button class="btn block" data-action="calendar.save">Save file</button>
+    <button class="btn ghost block" style="margin-top:8px" data-action="sheet.close">Close</button>`, 'Add to Calendar');
+}
+
+actions['calendar.save'] = async () => {
+  if (!calendarFile) return;
+  const saved = await saveFile(calendarFile.name, 'text/calendar', calendarFile.ics);
+  if (!saved) return;
+  const { onSaved } = calendarFile;
+  calendarFile = null;
+  closeSheet();
+  toast('Saved. Now open it from the Files app.', 5000);
+  await onSaved?.();
+};
+
+export const isStandalone =() => navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 
 export { html, raw, esc };

@@ -1,5 +1,5 @@
 import { html, fmtDateTime, fmtWeekdayTime, uid } from '../util.js';
-import { actions, changes, forms, header, icons, openSheet, closeSheet, toast, saveFile, go } from '../ui.js';
+import { actions, changes, forms, header, icons, openSheet, closeSheet, toast, offerCalendarFile, go } from '../ui.js';
 import { state, upsert, remove, apptDate } from '../store.js';
 import { buildCalendar } from '../ics.js';
 
@@ -170,5 +170,5 @@ actions['appt.calendar'] = async (el) => {
     weekdays: a.weekly ? [apptDate(a).getDay()] : undefined,
     alarmsBefore: [1440, 60]
   }], 'New Route appointment');
-  await saveFile('appointment.ics', 'text/calendar', ics);
+  offerCalendarFile('appointment.ics', ics, { what: 'the appointment to Calendar' });
 };
