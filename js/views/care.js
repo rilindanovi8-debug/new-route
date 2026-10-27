@@ -170,5 +170,5 @@ actions['appt.calendar'] = async (el) => {
     weekdays: a.weekly ? [apptDate(a).getDay()] : undefined,
     alarmsBefore: [1440, 60]
   }], 'New Route appointment');
-  offerCalendarFile('appointment.ics', ics, { what: 'the appointment to Calendar' });
+  offerCalendarFile([{ label: 'Appointment', name: 'appointment.ics', ics }], { what: 'the appointment to Calendar' });
 };

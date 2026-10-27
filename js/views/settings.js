@@ -51,7 +51,7 @@ export function settingsView() {
             ${timeRow('quietEnd', 'Quiet hours end', s.quietEnd)}
             <div class="setting"><button class="plain" data-action="reminders.calendar">Add reminders to Calendar</button></div>
           </div>
-          <p class="foot">A web app can't send notifications while it is closed, so New Route puts check-ins, habit nudges and appointment reminders in your iPhone Calendar instead. Tap the button, save the file to Files, then open it from the Files app and tap "Add All". Tip: when asked, add them to a new calendar called "New Route" so you can remove them in one step. If you change times or habits later, delete the old ones first, then add again. Budget alerts appear inside the app when you log an expense. Reminders in quiet hours are left out.</p>
+          <p class="foot">A web app can't send notifications while it is closed, so New Route puts check-ins, habit nudges and appointment reminders in your iPhone Calendar instead. Tap the button, add each reminder one at a time: save it to Files, open it there, tap the event, then "Add to Calendar". Tip: when asked, add them to a new calendar called "New Route" so you can remove them in one step. If you change times or habits later, delete the old ones first, then add again. Budget alerts appear inside the app when you log an expense. Reminders in quiet hours are left out.</p>
         </section>
 
         <section class="stack"><span class="label">Privacy</span>
@@ -147,8 +147,9 @@ actions['reminders.calendar'] = async () => {
   const s = state.settings;
   const sequence = s.reminderSeq;
   const events = [];
+  const skipped = [];
   const add = (uid, summary, minutes, weekdays = []) => {
-    if (isQuiet(minutes)) return;
+    if (isQuiet(minutes)) { skipped.push(`${summary} (${minutesToHHMM(minutes)})`); return; }
     events.push({
       uid, summary, sequence,
       start: nextOccurrence(minutes, weekdays.length ? weekdays[0] : null),
@@ -165,9 +166,19 @@ actions['reminders.calendar'] = async () => {
     state.habits.filter((h) => h.reminderMinutes !== null && h.reminderMinutes !== undefined)
       .forEach((h) => add(`habit-${h.id}`, `Time for: ${h.name}`, h.reminderMinutes, h.weekdays || []));
   }
-  if (!events.length) return toast('Nothing to add. Turn on check-ins or give a habit a reminder time.');
-  offerCalendarFile('new-route-reminders.ics', buildCalendar(events, 'New Route'), {
+  if (!events.length) {
+    return toast(skipped.length ? 'All reminders fall in quiet hours. Change the times or quiet hours first.'
+      : 'Nothing to add. Turn on check-ins or give a habit a reminder time.');
+  }
+  const items = events.map((e) => ({
+    label: `${e.summary} (${minutesToHHMM(e.start.getHours() * 60 + e.start.getMinutes())})`,
+    name: `${e.uid}.ics`,
+    ics: buildCalendar([e], 'New Route')
+  }));
+  offerCalendarFile(items, {
     what: 'reminders to Calendar',
+    all: { name: 'new-route-reminders.ics', ics: buildCalendar(events, 'New Route') },
+    skipped,
     onSaved: () => setSettings({ reminderSeq: sequence + 1 })
   });
 };
